@@ -7,8 +7,8 @@ TARGETDIR   := target
 SRCEXT      := cpp
 
 # compiler parameters
-CC          := g++
-CFLAGS      := -g3 -std=c++14 -Wall -Wpedantic -Werror -pg
+CC          := g++-4.9
+CFLAGS      := -O3 -std=c++14 -Wall -Wpedantic -Werror
 LIB         := m
 INC         := /usr/local/include libs
 DEFINES     := GLIBCXX_FORCE_NEW
@@ -39,7 +39,7 @@ CFLAGS += -MD
 
 
 # special definitions used for the unit tests
-ifeq ($(MAKECMDGOALS),$(TARGETDIR)/tests)
+ifeq ($(MAKECMDGOALS),tests)
     # adds an extra include so the tests can include the sources
 	INC += src
 
@@ -69,6 +69,10 @@ DEFINES := $(addprefix -D,$(DEFINES))
 # INTERNAL: builds the binary
 $(TARGET): $(OBJS) | dirs
 	@$(CC) $(CFLAGS) $(INC) $(DEFINES) $^ $(LIB) -o $@
+	@echo "LD $@"
+
+tests: $(OBJS) | dirs
+	@$(CC) $(CFLAGS) $(INC) $(DEFINES) $^ $(LIB) -o $(TARGETDIR)/$@
 	@echo "LD $@"
 
 # shows usage

@@ -151,6 +151,16 @@ void test_boiermur()
         TEST_MATCHES(p, "well, hello hello my friend... oh! hello bye bye LOL", 6);
         ASSERT_NO_MATCH(p, "hellohello heee llooo wehehe low hello hell oops");
     }
+    {
+        BM::Pattern p{"ttttagagca"};
+        
+        TEST_MATCHES(p, "attttagagca", 1);
+    }
+    {
+        BM::Pattern p{  "aagcgaataccg"};
+
+        TEST_MATCHES(p, "tggtacaaagcgaataccg", 7);
+    }
 }
 
 #ifdef __TESTS__

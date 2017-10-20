@@ -134,7 +134,7 @@ Pattern::~Pattern()
  * @param index Index where the rule is applied. 
  * @return size_t The amount to shift.
  */
-size_t Pattern::bad_char_shift(char c, size_t index) const
+size_t Pattern::bad_char_shift(unsigned char c, size_t index) const
 {
     size_t shift = 0;
 
@@ -185,13 +185,18 @@ vector<size_t> Pattern::find(const string &T) const
         else
         {
             size_t bc_shift = this->bad_char_shift(T[k - 1], i - 1);
-            size_t gs_shift = this->Lp[i - 1];
-            if (gs_shift == 0)
-            {
-                gs_shift = this->lp[i - 1];
+            size_t gs_shift = 0;
+
+            /* checks if at least 1 character matched, or else the good-suffix rule is not valid */
+            if (i < this->len) {
+                gs_shift = this->Lp[i];
+                if (gs_shift == 0)
+                {
+                    gs_shift = this->lp[i];
+                }
+                gs_shift = this->len - gs_shift - 1;
             }
-            gs_shift = this->len - gs_shift;
-            size_t new_shift = std::max(bc_shift, this->len - gs_shift);
+            size_t new_shift = std::max(bc_shift, gs_shift);
 
             shift += new_shift;
         }

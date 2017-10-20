@@ -19,7 +19,11 @@ void display_usage( const string& bin_name ) {
 }
 
 
+#ifdef __TESTS__
+int dummy_main(int argc, const char *argv[])
+#else
 int main(int argc, const char *argv[])
+#endif
 {
     try
     {
@@ -38,6 +42,8 @@ int main(int argc, const char *argv[])
 
         BM::Pattern p{ pattern };
 
+        cout << p << endl;
+
         size_t buffer_size = 1 << 20;
         char input[buffer_size];
         size_t bytes_read = 0;
@@ -52,7 +58,7 @@ int main(int argc, const char *argv[])
             } else {
                 memmove( input, input + buffer_size - pattern.length() + 1, pattern.length() - 1 );
                 cin.read( input + pattern.length() - 1, buffer_size - pattern.length() + 1 );
-                bytes_read = cin.gcount() + 3;
+                bytes_read = cin.gcount() + pattern.length() - 1;
             }
 
             if( !bytes_read ) {
@@ -72,8 +78,8 @@ int main(int argc, const char *argv[])
                 } else {
                     base -= 40;
                 }
-                cout << "\x1B[1;32m" << base_index + match << "\x1B[1;34m" <<  ": "  << "\x1B[0m"
-                     << in_str.substr(match - base, 40) << "\x1B[1;31m" << in_str.substr(match, pattern.length())
+                cout << "\x1B[1;32m" << base_index + match << "\x1B[1;34m" << ": " << "\x1B[0m"
+                     << in_str.substr(base, match - base) << "\x1B[1;31m" << in_str.substr(match, pattern.length())
                      << "\x1B[0m" << in_str.substr(match + pattern.length(), 40) << endl;
             }
 

@@ -17,7 +17,7 @@ class Pattern
     Pattern(const std::string &pattern);
     ~Pattern();
 
-    size_t bad_char_shift( char c, size_t index ) const;
+    size_t bad_char_shift( unsigned char c, size_t index ) const;
     
     std::vector<size_t> find(const char *T) const;
     std::vector<size_t> find(const std::string &T) const;
@@ -26,13 +26,13 @@ class Pattern
     {
         //os << "[";
         //for (size_t i = 0; i < 256; i++) {
-            size_t i = static_cast<size_t>('e');
-            os << "[";
-            for( size_t j; j < p.bad_char_table[i].size() - 1; j++ ) {
-                os << p.bad_char_table[i][j] << ", ";
-            }
-            os << p.bad_char_table[i][p.bad_char_table[i].size()-1];
-            os << "]" << std::endl;
+            //size_t i = static_cast<size_t>('e');
+            //os << "[";
+            //for( size_t j; j < p.bad_char_table[i].size() - 1; j++ ) {
+            //    os << p.bad_char_table[i][j] << ", ";
+            //}
+            //os << p.bad_char_table[i][p.bad_char_table[i].size()-1];
+            //os << "]" << std::endl;
         //}
         //os << "]" << std::endl;
 
