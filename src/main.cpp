@@ -66,7 +66,15 @@ int main(int argc, const char *argv[])
     
             /* prints the matches */
             for( auto match: matches ) {
-                cout << "match at " << base_index + match << ": " << in_str.substr(match, pattern.length() * 2) << endl;
+                size_t base = match;
+                if( base < 40 ) {
+                    base = 0; 
+                } else {
+                    base -= 40;
+                }
+                cout << "\x1B[1;32m" << base_index + match << "\x1B[1;34m" <<  ": "  << "\x1B[0m"
+                     << in_str.substr(match - base, 40) << "\x1B[1;31m" << in_str.substr(match, pattern.length())
+                     << "\x1B[0m" << in_str.substr(match + pattern.length(), 40) << endl;
             }
 
             base_index += bytes_read;
