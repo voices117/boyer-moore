@@ -44,7 +44,7 @@ int main(int argc, const char *argv[])
 
         cout << p << endl;
 
-        size_t buffer_size = 1 << 20;
+        const size_t buffer_size = 1 << 20;
         char input[buffer_size];
         size_t bytes_read = 0;
         size_t base_index = 0;

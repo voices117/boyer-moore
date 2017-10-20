@@ -7,7 +7,7 @@ TARGETDIR   := target
 SRCEXT      := cpp
 
 # compiler parameters
-CC          := g++-4.9
+CC          := g++
 CFLAGS      := -O3 -std=c++14 -Wall -Wpedantic -Werror
 LIB         := m
 INC         := /usr/local/include libs
