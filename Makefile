@@ -74,6 +74,7 @@ $(TARGET): $(OBJS) | dirs
 
 # compiles the tests
 tests: $(TARGETDIR)/tests | dirs
+	./$(TARGETDIR)/tests
 
 # shows usage
 help:
@@ -101,7 +102,6 @@ dirs:
 $(TARGETDIR)/tests: $(OBJS) | dirs
 	@$(CC) $(CFLAGS) $(INC) $(DEFINES) $^ $(LIB) -o $(TARGETDIR)/tests
 	@echo "LD $@"
-	./$(TARGETDIR)/tests
 
 # rule to build object files
 $(BUILDDIR)/$(BIN_NAME)/%.o $(BUILDDIR)/tests/%.o: %.$(SRCEXT)
