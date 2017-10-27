@@ -32,7 +32,7 @@ BUILDDIR := $(BUILDDIR)
 SRCS := $(shell find $(SRCDIR) -type f -name *.$(SRCEXT))
 
 # object files
-OBJS := $(patsubst %,$(BUILDDIR)/%,$(SRCS:.$(SRCEXT)=.o))
+OBJS := $(patsubst %,$(BUILDDIR)/$(BIN_NAME)/%,$(SRCS:.$(SRCEXT)=.o))
 
 # includes the flag to generate the dependency files when compiling
 CFLAGS += -MD
@@ -53,7 +53,8 @@ ifeq ($(MAKECMDGOALS),tests)
 	TEST_SRCS := $(shell find $(TESTDIR) -type f -name *.$(SRCEXT))
 
 	# test objects
-	OBJS := $(patsubst %,$(BUILDDIR)/%,$(TEST_SRCS:.$(SRCEXT)=.o)) $(OBJS)
+	OBJS := $(patsubst $(BUILDDIR)/$(BIN_NAME)/%,$(BUILDDIR)/tests/%,$(OBJS))
+	OBJS := $(patsubst %,$(BUILDDIR)/tests/%,$(TEST_SRCS:.$(SRCEXT)=.o)) $(OBJS)
 endif
 
 # adds the include prefix to the include directories
@@ -66,28 +67,23 @@ LIB := $(addprefix -l,$(LIB))
 DEFINES := $(addprefix -D,$(DEFINES))
 
 
-# INTERNAL: builds the binary
+# builds the binary
 $(TARGET): $(OBJS) | dirs
 	@$(CC) $(CFLAGS) $(INC) $(DEFINES) $^ $(LIB) -o $@
 	@echo "LD $@"
 
-tests: $(OBJS) | dirs
-	@$(CC) $(CFLAGS) $(INC) $(DEFINES) $^ $(LIB) -o $(TARGETDIR)/$@
-	@echo "LD $@"
+# compiles the tests
+tests: $(TARGETDIR)/tests | dirs
 
 # shows usage
 help:
-	@echo "To compile all binaries:"
+	@echo "To compile the binary:"
 	@echo
 	@echo "\t\033[1;92m$$ make\033[0m"
 	@echo
-	@echo "To compile just one binary:"
+	@echo "To compile the tests:"
 	@echo
-	@echo "\t\033[1;92m$$ make bin-\033[1;31m<name>\033[0m"
-	@echo
-	@echo "where \033[1;31m<name>\033[0m is the name of the binary to compile."
-	@echo "Source files for each binary are expected to be in \033[1;92m$(SRCDIR)/\033[0m\033[1;31m<name>\033[0m."
-	@echo "Additional source files in \033[1;92m$(LIBSDIR)\033[0m are available for every binary."
+	@echo "\t\033[1;92m$$ make tests"
 	@echo
 	@echo "Compiled binaries can be found in \033[1;92m$(TARGETDIR)\033[0m."
 	@echo
@@ -108,13 +104,13 @@ $(TARGETDIR)/tests: $(OBJS) | dirs
 	./$(TARGETDIR)/tests
 
 # rule to build object files
-$(BUILDDIR)/%.o: %.$(SRCEXT)
+$(BUILDDIR)/$(BIN_NAME)/%.o $(BUILDDIR)/tests/%.o: %.$(SRCEXT)
 	@mkdir -p $(basename $@)
 	@echo "CC $<"
 	@$(CC) $(CFLAGS) $(INC) $(DEFINES) $(LIB) -c -o $@ $<
 
 
-.PHONY: clean dirs tests all
+.PHONY: clean dirs tests
 
 # includes generated dependency files
 -include $(OBJS:.o=.d)
