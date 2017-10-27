@@ -84,7 +84,7 @@ help:
 	@echo
 	@echo "To compile the tests:"
 	@echo
-	@echo "\t\033[1;92m$$ make tests"
+	@echo "\t\033[1;92m$$ make tests\033[0m"
 	@echo
 	@echo "Compiled binaries can be found in \033[1;92m$(TARGETDIR)\033[0m."
 	@echo
