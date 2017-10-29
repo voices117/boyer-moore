@@ -1,10 +1,10 @@
 /* include area */
 #include "boiermur.hpp"
-#include <string.h>
 #include <exception>
 #include <iostream>
-#include <vector>
 #include <iterator>
+#include <string.h>
+#include <vector>
 
 using std::size_t;
 using std::vector;
@@ -22,21 +22,17 @@ using std::endl;
 
 /* test macros */
 #define ASSERT(e)                     \
-    if (!(e))                         \
-    {                                 \
+    if (!(e)) {                       \
         throw XSTR(__LINE__) ": " #e; \
     }
 
 #define Z_TEST(text, expected)                                                \
-    do                                                                        \
-    {                                                                         \
+    do {                                                                      \
         string s{text};                                                       \
-        size_t *z_num = new size_t[s.length()];                               \
+        size_t* z_num = new size_t[s.length()];                               \
         BM::Z(z_num, BM::RString{s});                                         \
-        for (size_t i = 0; i < expected.size(); i++)                          \
-        {                                                                     \
-            if (z_num[i] != expected[i])                                      \
-            {                                                                 \
+        for (size_t i = 0; i < expected.size(); i++) {                        \
+            if (z_num[i] != expected[i]) {                                    \
                 cout << "at iteration " << i << endl;                         \
                 cout << "expected: " << expected << endl;                     \
                 cout << "obtained: " << to_vector(z_num, s.length()) << endl; \
@@ -45,12 +41,9 @@ using std::endl;
         }                                                                     \
     } while (0)
 
-
 template <typename T>
-std::ostream &operator<<(std::ostream &out, const std::vector<T> &v)
-{
-    if (!v.empty())
-    {
+std::ostream& operator<<(std::ostream& out, const std::vector<T>& v) {
+    if (!v.empty()) {
         out << '[';
         std::copy(v.begin(), v.end(), std::ostream_iterator<T>(out, ", "));
         out << "\b\b]";
@@ -58,11 +51,9 @@ std::ostream &operator<<(std::ostream &out, const std::vector<T> &v)
     return out;
 }
 
-vector<size_t> to_vector(size_t *a, size_t len)
-{
+vector<size_t> to_vector(size_t* a, size_t len) {
     vector<size_t> v;
-    for (size_t i = 0; i < len; i++)
-    {
+    for (size_t i = 0; i < len; i++) {
         v.push_back(a[i]);
     }
     return std::move(v);
@@ -71,28 +62,27 @@ vector<size_t> to_vector(size_t *a, size_t len)
 /**
  * Tests the Z algorithm implementation (on a reversed string).
  */
-void test_z()
-{
+void test_z() {
     {
-        const char *test = "abcabcd";
+        const char* test = "abcabcd";
         vector<size_t> expected = {7, 0, 0, 0, 0, 0, 0};
 
         Z_TEST(test, expected);
     }
     {
-        const char *test = "dcbacba";
+        const char* test = "dcbacba";
         vector<size_t> expected = {7, 0, 0, 3, 0, 0, 0};
 
         Z_TEST(test, expected);
     }
     {
-        const char *test = "banana";
+        const char* test = "banana";
         vector<size_t> expected = {6, 0, 3, 0, 1, 0};
 
         Z_TEST(test, expected);
     }
     {
-        const char *test = "aaaaaaaaaabbbbb";
+        const char* test = "aaaaaaaaaabbbbb";
         vector<size_t> expected = {15, 4, 3, 2, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
 
         Z_TEST(test, expected);
@@ -102,23 +92,19 @@ void test_z()
 /**
  * Tests the final Boyer-Moore algorithm.
  */
-void test_boiermur()
-{
-#define TEST_MATCHES(P, T, ...)                      \
-    do                                               \
-    {                                                \
-        vector<size_t> expected = {__VA_ARGS__};     \
-        auto obtained = P.find(T);                   \
-        ASSERT(expected.size() == obtained.size());  \
-        for (size_t i = 0; i < expected.size(); i++) \
-        {                                            \
-            ASSERT(expected[i] == obtained[i]);      \
-        }                                            \
+void test_boiermur() {
+#define TEST_MATCHES(P, T, ...)                        \
+    do {                                               \
+        vector<size_t> expected = {__VA_ARGS__};       \
+        auto obtained = P.find(T);                     \
+        ASSERT(expected.size() == obtained.size());    \
+        for (size_t i = 0; i < expected.size(); i++) { \
+            ASSERT(expected[i] == obtained[i]);        \
+        }                                              \
     } while (0)
 
 #define ASSERT_NO_MATCH(P, T)         \
-    do                                \
-    {                                 \
+    do {                              \
         auto obtained = P.find(T);    \
         ASSERT(obtained.size() == 0); \
     } while (0)
@@ -153,29 +139,26 @@ void test_boiermur()
     }
     {
         BM::Pattern p{"ttttagagca"};
-        
+
         TEST_MATCHES(p, "attttagagca", 1);
     }
     {
-        BM::Pattern p{  "aagcgaataccg"};
+        BM::Pattern p{"aagcgaataccg"};
 
         TEST_MATCHES(p, "tggtacaaagcgaataccg", 7);
     }
 }
 
 #ifdef __TESTS__
-int main(int argc, const char *argv[])
+int main(int argc, const char* argv[])
 #else
-int test_main(int argc, const char *argv[])
+int test_main(int argc, const char* argv[])
 #endif
 {
-    try
-    {
+    try {
         test_z();
         test_boiermur();
-    }
-    catch (const char *e)
-    {
+    } catch (const char* e) {
         cout << RED_TEXT("[ FAILED ]") " at " << e << endl;
         return 1;
     }
