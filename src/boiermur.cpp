@@ -74,13 +74,12 @@ Pattern::Pattern(const char* pattern, size_t len) : pattern(pattern), len(len) {
         this->bad_char_table[c].push_back(i - 1);
     }
 
-    /* builds the good-sufix rule table */
+    /* builds the good-suffix rule table */
     size_t* z_array = new size_t[this->len];
     BM::Z(z_array, RString{pattern, this->len});
 
     this->Lp = new int[this->len + 1]; // TODO: use vector
-    this->Lp[this->len] =
-        this->len - 1; // used by the good-sufix rule when no character matched
+    this->Lp[this->len] = 1;           // used by the good-suffix rule when no character matched
     memset(this->Lp, 0, this->len * sizeof(int));
     for (size_t i = 0; i < this->len - 1; i++) {
         size_t N_j = z_array[this->len - i - 1];
@@ -94,8 +93,10 @@ Pattern::Pattern(const char* pattern, size_t len) : pattern(pattern), len(len) {
     this->lp = new int[this->len]; // TODO: use vector
     size_t longest = 0;
     for (size_t i = this->len; i > 0; i--) {
-        longest = max(longest, z_array[i - 1]);
-        this->lp[i - 1] = this->len - longest - 1;
+        if (this->len - i + 1 == z_array[i - 1]) {
+            longest = max(longest, z_array[i - 1]);
+        }
+        this->lp[i - 1] = this->len - longest;
     }
 
     delete[] z_array;
@@ -106,28 +107,6 @@ Pattern::Pattern(const string& T) : Pattern(T.c_str(), T.length()) {}
 Pattern::~Pattern() {
     delete[] this->Lp;
     delete[] this->lp;
-}
-
-/**
- * @brief Returns the shift calculated by using the bad-character rule in the
- * given index.
- *
- * @param c The character in T that did not match.
- * @param index Index where the rule is applied.
- * @return size_t The amount to shift.
- */
-size_t Pattern::bad_char_shift(unsigned char c, size_t index) const {
-    size_t shift = 0;
-
-    /* finds the index of the next character c in the pattern left to the current position */
-    size_t cc = static_cast<size_t>(c);
-    for (auto i : this->bad_char_table[cc]) {
-        if (i < index) {
-            shift = i;
-            break;
-        }
-    }
-    return std::max(index - shift, size_t(1));
 }
 
 /**
@@ -157,16 +136,9 @@ vector<size_t> Pattern::find(const string& T) const {
             shift += std::max(this->len - this->lp[1], size_t(1));
         } else {
             size_t bc_shift = this->bad_char_shift(T[k - 1], i - 1);
-            size_t gs_shift = 0;
+            size_t gs_shift = this->good_suffix_shift(i);
 
-            gs_shift = this->Lp[i];
-            if (gs_shift == this->len - 1) {
-                gs_shift = this->lp[i];
-            }
-
-            size_t new_shift = std::max(bc_shift, gs_shift);
-
-            shift += new_shift;
+            shift += std::max(bc_shift, gs_shift);
         }
     }
     return matches;
@@ -189,13 +161,22 @@ std::ostream& BM::operator<<(std::ostream& os, const BM::Pattern& p) {
     //}
     // os << "]" << std::endl;
 
-    os << "[";
+    size_t* z_array = new size_t[p.len];
+    BM::Z(z_array, RString{"ana banana", p.len});
+
+    os << "Z  = [";
+    for (size_t i = 0; i < p.len - 1; i++) {
+        os << z_array[i] << ", ";
+    }
+    os << z_array[p.len - 1] << "]" << std::endl;
+
+    os << "Lp = [ ";
     for (size_t i = 0; i < p.len - 1; i++) {
         os << p.Lp[i] << ", ";
     }
     os << p.Lp[p.len - 1] << "]" << std::endl;
 
-    os << "[";
+    os << "lp = [";
     for (size_t i = 0; i < p.len - 1; i++) {
         os << p.lp[i] << ", ";
     }

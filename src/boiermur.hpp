@@ -15,7 +15,8 @@ namespace BM {
         Pattern(const std::string& pattern);
         ~Pattern();
 
-        size_t bad_char_shift(unsigned char c, size_t index) const;
+        inline size_t bad_char_shift(unsigned char c, size_t index) const;
+        inline size_t good_suffix_shift(size_t index) const;
 
         std::vector<size_t> find(const char* T) const;
         std::vector<size_t> find(const std::string& T) const;
@@ -47,6 +48,42 @@ namespace BM {
 
     template <typename S>
     void Z(std::size_t* z, S s);
+}
+
+/**
+ * @brief Returns the shift calculated by using the bad-character rule in the
+ * given index.
+ *
+ * @param c The character in T that did not match.
+ * @param index Index where the rule is applied.
+ * @return size_t The amount to shift.
+ */
+inline size_t BM::Pattern::bad_char_shift(unsigned char c, size_t index) const {
+    size_t shift = 0;
+
+    /* finds the index of the next character c in the pattern left to the current position */
+    size_t cc = static_cast<size_t>(c);
+    for (auto i : this->bad_char_table[cc]) {
+        if (i < index) {
+            shift = i;
+            break;
+        }
+    }
+    return std::max(index - shift, size_t(1));
+}
+
+/**
+* @brief Applies the good suffix rule at a given index and returns the amount to shift.
+* 
+* @param index Index of the last character matched.
+* @return size_t Amount to shift.
+*/
+inline size_t BM::Pattern::good_suffix_shift(size_t index) const {
+    size_t gs_shift = this->Lp[index];
+    if (gs_shift == 0) {
+        gs_shift = this->lp[index];
+    }
+    return gs_shift;
 }
 
 #endif
