@@ -21,7 +21,7 @@ using BM::RString;
  * @param len The length of \c s.
  */
 template <typename S>
-void BM::Z(size_t* z, S s) {
+void BM::Z(vector<size_t>& z, S s) {
     z[0] = s.length();
 
     size_t l = 0, r = 0;
@@ -75,7 +75,8 @@ Pattern::Pattern(const char* pattern, size_t len) : pattern(pattern), len(len) {
     }
 
     /* builds the good-suffix rule table */
-    size_t* z_array = new size_t[this->len];
+    vector<size_t> z_array;
+    z_array.reserve(this->len);
     BM::Z(z_array, RString{pattern, this->len});
 
     this->Lp = new int[this->len + 1]; // TODO: use vector
@@ -98,8 +99,6 @@ Pattern::Pattern(const char* pattern, size_t len) : pattern(pattern), len(len) {
         }
         this->lp[i - 1] = this->len - longest;
     }
-
-    delete[] z_array;
 }
 
 Pattern::Pattern(const string& T) : Pattern(T.c_str(), T.length()) {}
@@ -161,7 +160,8 @@ std::ostream& BM::operator<<(std::ostream& os, const BM::Pattern& p) {
     //}
     // os << "]" << std::endl;
 
-    size_t* z_array = new size_t[p.len];
+    vector<size_t> z_array;
+    z_array.reserve(p.len);
     BM::Z(z_array, RString{"ana banana", p.len});
 
     os << "Z  = [";

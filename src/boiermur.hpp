@@ -47,7 +47,7 @@ namespace BM {
     };
 
     template <typename S>
-    void Z(std::size_t* z, S s);
+    void Z(std::vector<std::size_t>& z, S s);
 }
 
 /**

@@ -32,19 +32,20 @@ using std::endl;
             static_cast<string>("\nexpected=") + std::to_string(expected) + "\n";                    \
     }
 
-#define Z_TEST(text, expected)                                                \
-    do {                                                                      \
-        string s{text};                                                       \
-        size_t* z_num = new size_t[s.length()];                               \
-        BM::Z(z_num, BM::RString{s});                                         \
-        for (size_t i = 0; i < expected.size(); i++) {                        \
-            if (z_num[i] != expected[i]) {                                    \
-                cout << "at iteration " << i << endl;                         \
-                cout << "expected: " << expected << endl;                     \
-                cout << "obtained: " << to_vector(z_num, s.length()) << endl; \
-                ASSERT(z_num[i] == expected[expected.size() - i - 1]);        \
-            }                                                                 \
-        }                                                                     \
+#define Z_TEST(text, expected)                                         \
+    do {                                                               \
+        string s{text};                                                \
+        vector<size_t> z_num;                                          \
+        z_num.reserve(s.length());                                     \
+        BM::Z(z_num, BM::RString{s});                                  \
+        for (size_t i = 0; i < expected.size(); i++) {                 \
+            if (z_num[i] != expected[i]) {                             \
+                cout << "at iteration " << i << endl;                  \
+                cout << "expected: " << expected << endl;              \
+                cout << "obtained: " << z_num << endl;                 \
+                ASSERT(z_num[i] == expected[expected.size() - i - 1]); \
+            }                                                          \
+        }                                                              \
     } while (0)
 
 template <typename T>
@@ -55,14 +56,6 @@ std::ostream& operator<<(std::ostream& out, const std::vector<T>& v) {
         out << "\b\b]";
     }
     return out;
-}
-
-vector<size_t> to_vector(size_t* a, size_t len) {
-    vector<size_t> v;
-    for (size_t i = 0; i < len; i++) {
-        v.push_back(a[i]);
-    }
-    return std::move(v);
 }
 
 /**
