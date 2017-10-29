@@ -1,10 +1,10 @@
 /* include area */
 #include "boiermur.hpp"
-#include <string.h>
 #include <algorithm>
-#include <cstring>
 #include <assert.h>
+#include <cstring>
 #include <iostream>
+#include <string.h>
 
 using std::size_t;
 using std::string;
@@ -15,7 +15,7 @@ using BM::RString;
 
 /**
  * Calculates the Z number of \c s using the Z algorithm.
- * 
+ *
  * @param z   Z array (output).
  * @param s   String to preprocess.
  * @param len The length of \c s.
@@ -71,12 +71,10 @@ void BM::Z(size_t *z, S s)
 
 /**
  * Pattern constructor implementation.
- * 
+ *
  * @param pattern C string to be used as a pattern.
  */
-Pattern::Pattern(const char *pattern) : Pattern(pattern, strlen(pattern))
-{
-}
+Pattern::Pattern(const char *pattern) : Pattern(pattern, strlen(pattern)) {}
 
 Pattern::Pattern(const char *pattern, size_t len) : pattern(pattern), len(len)
 {
@@ -92,7 +90,9 @@ Pattern::Pattern(const char *pattern, size_t len) : pattern(pattern), len(len)
     size_t *z_array = new size_t[this->len];
     BM::Z(z_array, RString{pattern, this->len});
 
-    this->Lp = new int[this->len]; // TODO: use vector
+    this->Lp = new int[this->len + 1]; // TODO: use vector
+    this->Lp[this->len] =
+        this->len - 1; // used by the good-sufix rule when no character matched
     memset(this->Lp, 0, this->len * sizeof(int));
     for (size_t i = 0; i < this->len - 1; i++)
     {
@@ -102,7 +102,7 @@ Pattern::Pattern(const char *pattern, size_t len) : pattern(pattern), len(len)
             continue;
         }
         size_t k = this->len - N_j;
-        this->Lp[k] = i;
+        this->Lp[k] = this->len - i - 1;
     }
 
     this->lp = new int[this->len]; // TODO: use vector
@@ -110,15 +110,13 @@ Pattern::Pattern(const char *pattern, size_t len) : pattern(pattern), len(len)
     for (size_t i = this->len; i > 0; i--)
     {
         longest = max(longest, z_array[i - 1]);
-        this->lp[i - 1] = longest;
+        this->lp[i - 1] = this->len - longest - 1;
     }
 
     delete[] z_array;
 }
 
-Pattern::Pattern(const string &T) : Pattern(T.c_str(), T.length())
-{
-}
+Pattern::Pattern(const string &T) : Pattern(T.c_str(), T.length()) {}
 
 Pattern::~Pattern()
 {
@@ -129,16 +127,17 @@ Pattern::~Pattern()
 /**
  * @brief Returns the shift calculated by using the bad-character rule in the
  * given index.
- * 
- * @param c The character in T that did not match. 
- * @param index Index where the rule is applied. 
+ *
+ * @param c The character in T that did not match.
+ * @param index Index where the rule is applied.
  * @return size_t The amount to shift.
  */
 size_t Pattern::bad_char_shift(unsigned char c, size_t index) const
 {
     size_t shift = 0;
 
-    /* finds the index of the next character c in the pattern left to the current position */
+    /* finds the index of the next character c in the pattern left to the current
+   * position */
     size_t cc = static_cast<size_t>(c);
     for (auto i : this->bad_char_table[cc])
     {
@@ -153,7 +152,7 @@ size_t Pattern::bad_char_shift(unsigned char c, size_t index) const
 
 /**
  * Finds the repetitions of pattern in the given text.
- * 
+ *
  * @param T Text where the pattern is searched.
  */
 vector<size_t> Pattern::find(const string &T) const
@@ -187,15 +186,14 @@ vector<size_t> Pattern::find(const string &T) const
             size_t bc_shift = this->bad_char_shift(T[k - 1], i - 1);
             size_t gs_shift = 0;
 
-            /* checks if at least 1 character matched, or else the good-suffix rule is not valid */
-            if (i < this->len) {
-                gs_shift = this->Lp[i];
-                if (gs_shift == 0)
-                {
-                    gs_shift = this->lp[i];
-                }
-                gs_shift = this->len - gs_shift - 1;
+            /* checks if at least 1 character matched, or else the good-suffix rule is
+       * not valid */
+            gs_shift = this->Lp[i];
+            if (gs_shift == this->len - 1)
+            {
+                gs_shift = this->lp[i];
             }
+
             size_t new_shift = std::max(bc_shift, gs_shift);
 
             shift += new_shift;
@@ -207,4 +205,35 @@ vector<size_t> Pattern::find(const string &T) const
 vector<size_t> Pattern::find(const char *T) const
 {
     return this->find(string{T});
+}
+
+std::ostream &BM::operator<<(std::ostream &os, const BM::Pattern &p)
+{
+    // os << "[";
+    // for (size_t i = 0; i < 256; i++) {
+    // size_t i = static_cast<size_t>('e');
+    // os << "[";
+    // for( size_t j; j < p.bad_char_table[i].size() - 1; j++ ) {
+    //    os << p.bad_char_table[i][j] << ", ";
+    //}
+    // os << p.bad_char_table[i][p.bad_char_table[i].size()-1];
+    // os << "]" << std::endl;
+    //}
+    // os << "]" << std::endl;
+
+    os << "[";
+    for (size_t i = 0; i < p.len - 1; i++)
+    {
+        os << p.Lp[i] << ", ";
+    }
+    os << p.Lp[p.len - 1] << "]" << std::endl;
+
+    os << "[";
+    for (size_t i = 0; i < p.len - 1; i++)
+    {
+        os << p.lp[i] << ", ";
+    }
+    os << p.lp[p.len - 1] << "]" << std::endl;
+
+    return os;
 }
